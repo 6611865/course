@@ -288,31 +288,14 @@
       0%, 100% { box-shadow: 0 0 8px 2px var(--glow-color, hsl(145, 65%, 55%)); }
       50% { box-shadow: 0 0 24px 8px var(--glow-color, hsl(145, 65%, 55%)); }
     }
-    .course-card.now-active {
+    .course-card.now-active, .course-card.soon-active {
       animation: pulseGlow 2s ease-in-out infinite;
       border-width: 2px !important;
       border-color: var(--glow-color, hsl(145, 65%, 50%)) !important;
       transform: scale(1.03);
       z-index: 1;
     }
-    .badge-now {
-      background: var(--glow-color, hsl(145, 65%, 45%));
-      color: #fff;
-      font-size: 0.7rem;
-      padding: 0.15rem 0.6rem;
-      border-radius: 0.5rem;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      animation: pulseGlow 1.5s ease-in-out infinite;
-    }
-    .course-card.soon-active {
-      animation: pulseGlow 2s ease-in-out infinite;
-      border-width: 2px !important;
-      border-color: var(--glow-color, hsl(145, 65%, 50%)) !important;
-      transform: scale(1.03);
-      z-index: 1;
-    }
-    .badge-soon {
+    .badge-now, .badge-soon {
       background: var(--glow-color, hsl(145, 65%, 45%));
       color: #fff;
       font-size: 0.7rem;
@@ -599,11 +582,23 @@
       // 课程备注系统
       window.courseMemos = {};
       (function() {
+        const data = localStorage.getItem('course_memos');
+        if (data) {
+          try { window.courseMemos = JSON.parse(data); } catch(e) {}
+          return;
+        }
+        // 迁移旧多key格式
+        let migrated = false;
         for (let i = 0; i < localStorage.length; i++) {
           const key = localStorage.key(i);
           if (key.indexOf('course_memo_') === 0) {
             window.courseMemos[decodeURIComponent(key.slice(12))] = localStorage.getItem(key);
+            localStorage.removeItem(key);
+            migrated = true;
           }
+        }
+        if (migrated) {
+          localStorage.setItem('course_memos', JSON.stringify(window.courseMemos));
         }
       })();
 
@@ -640,7 +635,6 @@
           if (emptyMain) emptyMain.textContent = '加载失败';
           const emptySub = document.getElementById('empty-sub');
           if (emptySub) emptySub.textContent = '请检查网络连接后刷新页面';
-          console.error('Config load failed:', err);
         }
       })();
 
@@ -648,8 +642,8 @@
         return week % 2 === 1 ? 'odd' : 'even';
       }
 
-      function updateCountdown(simulatedNow) {
-        const now = simulatedNow || new Date();
+      function updateCountdown() {
+        const now = new Date();
         const semesterTitleEl = document.getElementById('semester-title');
         if (semesterTitleEl) {
           const month = SEMESTER_START.getMonth();
@@ -710,7 +704,7 @@
             }
           }
         }
-        updateHeaderWeek(simulatedNow);
+        updateHeaderWeek();
       }
 
       function parseTimeToMinutes(timeStr) {
@@ -723,15 +717,15 @@
         };
       }
 
-      function isCourseNow(timeStr, simulatedNow) {
-        const now = simulatedNow || new Date();
+      function isCourseNow(timeStr) {
+        const now = new Date();
         const range = parseTimeToMinutes(timeStr);
         const nowMin = now.getHours() * 60 + now.getMinutes();
         return nowMin >= range.start && nowMin < range.end;
       }
 
-      function isCourseSoon(timeStr, simulatedNow) {
-        const now = simulatedNow || new Date();
+      function isCourseSoon(timeStr) {
+        const now = new Date();
         const range = parseTimeToMinutes(timeStr);
         const nowMin = now.getHours() * 60 + now.getMinutes();
         return nowMin < range.start && range.start - nowMin <= 40;
@@ -913,7 +907,7 @@
         renderCourses();
       });
 
-      function updateWeekUI(simulatedNow) {
+      function updateWeekUI() {
         if (selectedWeek === 0) {
           weekBadgeEl.textContent = '未开学·预排课表';
           weekBadgeEl.style.background = 'var(--badge-odd-bg)';
@@ -923,7 +917,7 @@
           weekPrevEl.disabled = true;
           weekNextEl.disabled = false;
           if (weekTodayEl) weekTodayEl.classList.add('hidden');
-          updateHeaderWeek(simulatedNow);
+          updateHeaderWeek();
           return;
         }
         const parity = getParity(selectedWeek);
@@ -939,11 +933,11 @@
         if (weekTodayEl) {
           weekTodayEl.classList.toggle('hidden', selectedWeek === CURRENT_WEEK || selectedWeek === 0);
         }
-        updateHeaderWeek(simulatedNow);
+        updateHeaderWeek();
       }
 
-      function getCurrentWeek(simulatedNow) {
-        const now = simulatedNow || new Date();
+      function getCurrentWeek() {
+        const now = new Date();
         const diffMs = now.getTime() - SEMESTER_START.getTime();
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         if (diffDays < 0) return 0;
@@ -961,8 +955,8 @@
         return (monday.getMonth() + 1) + '/' + monday.getDate() + '-' + (sunday.getMonth() + 1) + '/' + sunday.getDate();
       }
 
-      function updateHeaderWeek(simulatedNow) {
-        const week = getCurrentWeek(simulatedNow);
+      function updateHeaderWeek() {
+        const week = getCurrentWeek();
         if (week === 0) {
           headerWeekEl.textContent = '未开学';
         } else {
@@ -1081,7 +1075,6 @@
           reg.update();
         }, 60 * 60 * 1000);
       }).catch(function (err) {
-        console.error('SW registration failed: ' + err);
       });
 
       // Listen for controller change
