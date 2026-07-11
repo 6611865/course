@@ -508,8 +508,8 @@
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
           </button>
           <div class="flex flex-col items-center px-1">
-            <span id="week-number" class="week-display">1</span>
-            <span id="week-sub" class="text-[0.6rem] text-slate-400 leading-tight">/ 18 周</span>
+            <span id="week-number" class="week-display">--</span>
+            <span id="week-sub" class="text-[0.6rem] text-slate-400 leading-tight">--</span>
           </div>
           <button id="week-next" class="week-stepper-btn" aria-label="下一周">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
@@ -607,7 +607,7 @@
         }
       })();
 
-      let SEMESTER_START, TOTAL_WEEKS, CURRENT_WEEK, selectedWeek;
+      let SEMESTER_START, TOTAL_WEEKS, CURRENT_WEEK, selectedWeek, SEMESTER_TOTAL_DAYS = 0, COUNTDOWN_MAX_DAYS = 92;
 
       // ─── Config loading & bootstrap ───
       (async function init() {
@@ -618,14 +618,9 @@
           SEMESTER_START = new Date(config.semester.start);
           TOTAL_WEEKS = config.semester.totalWeeks;
           SEMESTER_TOTAL_DAYS = TOTAL_WEEKS * 7;
+          COUNTDOWN_MAX_DAYS = Math.max(92, Math.ceil((SEMESTER_START.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
 
-          CURRENT_WEEK = (function() {
-            const now = new Date();
-            const diffMs = now.getTime() - SEMESTER_START.getTime();
-            const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-            if (diffDays < 0) return 0;
-            return Math.min(TOTAL_WEEKS, Math.floor(diffDays / 7) + 1);
-          })();
+          CURRENT_WEEK = getCurrentWeek();
           selectedWeek = CURRENT_WEEK;
 
           // ─── Bootstrap UI ───
@@ -651,8 +646,6 @@
       function getParity(week) {
         return week % 2 === 1 ? 'odd' : 'even';
       }
-
-      let SEMESTER_TOTAL_DAYS;
 
       function updateCountdown(simulatedNow) {
         const now = simulatedNow || new Date();
@@ -680,7 +673,7 @@
           if (countdownUnitEl) countdownUnitEl.textContent = '天';
           if (countdownSubtitleEl) countdownSubtitleEl.textContent = '暑假愉快，提前规划新学期 \u2728';
           if (ringEl) {
-            let offset = (1 - Math.min(1, Math.max(0, daysLeft / 92))) * 283;
+            let offset = (1 - Math.min(1, Math.max(0, daysLeft / COUNTDOWN_MAX_DAYS))) * 283;
             ringEl.style.strokeDashoffset = Math.round(offset);
           }
         } else {
@@ -912,11 +905,10 @@
         const trimmed = input.trim();
         if (trimmed === '') {
           delete window.courseMemos[courseName];
-          localStorage.removeItem('course_memo_' + encodeURIComponent(courseName));
         } else {
           window.courseMemos[courseName] = trimmed;
-          localStorage.setItem('course_memo_' + encodeURIComponent(courseName), trimmed);
         }
+        localStorage.setItem('course_memos', JSON.stringify(window.courseMemos));
         renderCourses();
       });
 
@@ -939,7 +931,7 @@
         weekBadgeEl.style.background = isOdd ? 'var(--badge-odd-bg)' : 'var(--badge-even-bg)';
         weekBadgeEl.style.color = isOdd ? 'var(--badge-odd-text)' : 'var(--badge-even-text)';
         weekNumberEl.textContent = String(selectedWeek);
-        weekSubEl.textContent = '/ 18 周';
+        weekSubEl.textContent = '/ ' + TOTAL_WEEKS + ' 周';
         weekPrevEl.disabled = selectedWeek <= 0;
         weekNextEl.disabled = selectedWeek >= TOTAL_WEEKS;
         // 回到今天按钮：仅在非本周时显示
@@ -1056,7 +1048,7 @@
     // ─── Theme detection ───
     (function() {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); window.renderCourses(); }
+      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); if (typeof SCHEDULE !== 'undefined') window.renderCourses(); }
       apply();
       mq.addEventListener('change', apply);
       // iOS PWA: matchMedia change event doesn't fire in standalone mode; re-check on visibility change (app back to foreground)
