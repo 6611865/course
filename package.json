@@ -1,0 +1,13 @@
+{
+  "name": "miaoda-html-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "coding-html-devserver dev",
+    "build": "coding-html-devserver build && node -e \"var f=require('fs'),p='dist/output/index.html',c=f.readFileSync(p,'utf8'),t=new Date().toISOString().replace(/[-:T.]/g,'').slice(0,14);c=c.replace(/\\{\\{appName\\}\\}/g,'课表').replace(/__BUILD_VER__/g,t);f.writeFileSync(p,c)\""
+  },
+  "devDependencies": {
+    "@lark-apaas/coding-html-devserver": "^0.1.5"
+  }
+}

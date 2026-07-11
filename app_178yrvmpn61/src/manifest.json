@@ -1,0 +1,19 @@
+{
+  "name": "24届网工7班 · 课程表",
+  "short_name": "课程表",
+  "description": "24届网工7班课程表，支持离线访问",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "hsl(220, 25%, 98%)",
+  "theme_color": "hsl(160, 55%, 65%)",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
