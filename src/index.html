@@ -466,7 +466,7 @@
           <h1 class="text-lg font-bold tracking-tight leading-tight" style="color:var(--text-slate-800);">
             我的课程表
           </h1>
-          <p class="text-xs mt-0.5" style="color:var(--text-slate-400);">2026秋季学期</p>
+          <p id="semester-title" class="text-xs mt-0.5" style="color:var(--text-slate-400);"></p>
         </div>
         <div class="flex items-center gap-2">
           <div class="flex items-center gap-2 rounded-xl px-3 py-2" style="background:var(--bg-slate-50);">
@@ -488,13 +488,13 @@
               stroke-linecap="round" stroke-dasharray="283" stroke-dashoffset="118" class="countdown-ring" />
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
-            <span id="countdown-days" class="text-lg font-bold leading-none" style="color:var(--ring-text);font-family:'Quicksand',sans-serif;">64</span>
+            <span id="countdown-days" class="sk-pulse text-lg font-bold leading-none" style="color:var(--ring-text);font-family:'Quicksand',sans-serif;">--</span>
             <span class="text-[0.6rem] text-slate-400 leading-tight">天</span>
           </div>
         </div>
         <div>
-          <p class="text-sm font-semibold" style="color:var(--ring-text);"><span id="countdown-label">距开学还有</span> <span id="countdown-days-text" style="font-family: 'Quicksand', sans-serif; color: var(--countdown-accent);">64</span> <span id="countdown-unit">天</span></p>
-          <p id="countdown-subtitle" class="text-xs mt-0.5" style="color:var(--text-slate-400);">暑假愉快，提前规划新学期 ✨</p>
+          <p class="text-sm font-semibold" style="color:var(--ring-text);"><span id="countdown-label"></span> <span id="countdown-days-text" class="sk-pulse" style="font-family: 'Quicksand', sans-serif; color: var(--countdown-accent);">...</span> <span id="countdown-unit"></span></p>
+          <p id="countdown-subtitle" class="text-xs mt-0.5" style="color:var(--text-slate-400);"></p>
         </div>
       </div>
 
@@ -656,6 +656,11 @@
 
       function updateCountdown(simulatedNow) {
         const now = simulatedNow || new Date();
+        const semesterTitleEl = document.getElementById('semester-title');
+        if (semesterTitleEl) {
+          const month = SEMESTER_START.getMonth();
+          semesterTitleEl.textContent = SEMESTER_START.getFullYear() + (month >= 2 && month < 8 ? '春季' : '秋季') + '学期';
+        }
         const startDiff = SEMESTER_START.getTime() - now.getTime();
         const countdownDaysEl = document.getElementById('countdown-days');
         const countdownDaysTextEl = document.getElementById('countdown-days-text');
@@ -663,6 +668,8 @@
         const countdownUnitEl = document.getElementById('countdown-unit');
         const countdownSubtitleEl = document.getElementById('countdown-subtitle');
         const ringEl = document.querySelector('.countdown-ring');
+        if (countdownDaysEl) countdownDaysEl.classList.remove('sk-pulse');
+        if (countdownDaysTextEl) countdownDaysTextEl.classList.remove('sk-pulse');
 
         if (startDiff > 0) {
           // 开学前：倒计时模式
@@ -761,6 +768,7 @@
       const headerWeekEl = document.getElementById('header-week');
 
       function getFilteredCourses(dayIndex) {
+        if (!SCHEDULE) return [];
         const week = selectedWeek === 0 ? 1 : selectedWeek;
         const all = SCHEDULE[dayIndex] || [];
         return all.filter(function(c) {
