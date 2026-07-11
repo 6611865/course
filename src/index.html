@@ -627,6 +627,10 @@
           SEMESTER_TOTAL_DAYS = TOTAL_WEEKS * 7;
           COUNTDOWN_MAX_DAYS = Math.max(92, Math.ceil((SEMESTER_START.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
           do { const s = SEMESTER_START; const e = new Date(s.getTime() + SEMESTER_TOTAL_DAYS * 86400000); SEMESTER_END = s.getFullYear() + '.' + (s.getMonth() + 1) + '.' + s.getDate() + ' - ' + e.getFullYear() + '.' + (e.getMonth() + 1) + '.' + e.getDate(); } while (0);
+          const REVIEW_WEEK = new Date(config.semester.sessions.reviewWeek + 'T00:00:00');
+          const EXAM_WEEK = new Date(config.semester.sessions.examWeek + 'T00:00:00');
+          const WINTER_BREAK = new Date(config.semester.sessions.winterBreak + 'T00:00:00');
+          const SPRING_START = new Date(config.semester.sessions.springStart + 'T00:00:00');
 
           CURRENT_WEEK = getCurrentWeek();
           selectedWeek = CURRENT_WEEK;
@@ -659,7 +663,7 @@
         const semesterTitleEl = document.getElementById('semester-title');
         if (semesterTitleEl) {
           const month = SEMESTER_START.getMonth();
-          semesterTitleEl.textContent = SEMESTER_START.getFullYear() + (month >= 2 && month < 8 ? '春季' : '秋季') + '学期';
+          semesterTitleEl.textContent = SEMESTER_START.getFullYear() + (month >= 1 && month < 7 ? '春季' : '秋季') + '学期';
         }
         const startDiff = SEMESTER_START.getTime() - now.getTime();
         const countdownDaysEl = document.getElementById('countdown-days');
@@ -678,8 +682,12 @@
           if (countdownDaysTextEl) countdownDaysTextEl.textContent = String(daysLeft);
           if (countdownLabelEl) countdownLabelEl.textContent = '距开学还有';
           if (countdownUnitEl) countdownUnitEl.textContent = '天';
-          const vacationLabel = (SEMESTER_START.getMonth() >= 2 && SEMESTER_START.getMonth() < 8) ? '寒假愉快' : '暑假愉快';
-          if (countdownSubtitleEl) countdownSubtitleEl.textContent = vacationLabel + '，提前规划新学期 \u2728';
+          const vacationLabel = (SEMESTER_START.getMonth() >= 1 && SEMESTER_START.getMonth() < 7) ? '寒假愉快' : '暑假愉快';
+          if (daysLeft <= 3) {
+            if (countdownSubtitleEl) countdownSubtitleEl.textContent = '8.29-8.30 记得报到注册';
+          } else {
+            if (countdownSubtitleEl) countdownSubtitleEl.textContent = vacationLabel + '，提前规划新学期 \u2728';
+          }
           if (ringEl) {
             let offset = (1 - Math.min(1, Math.max(0, daysLeft / COUNTDOWN_MAX_DAYS))) * RING_CIRCUMFERENCE;
             ringEl.style.strokeDashoffset = Math.round(offset);
@@ -689,21 +697,49 @@
           const elapsedMs = now.getTime() - SEMESTER_START.getTime();
           const dayOfSemester = Math.min(SEMESTER_TOTAL_DAYS, Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1));
           if (dayOfSemester > SEMESTER_TOTAL_DAYS) {
-            // 学期已结束
-            if (countdownDaysEl) countdownDaysEl.textContent = '--';
-            if (countdownDaysTextEl) countdownDaysTextEl.textContent = '--';
-            if (countdownLabelEl) countdownLabelEl.textContent = '学期已结束';
-            if (countdownUnitEl) countdownUnitEl.textContent = '';
-            if (countdownSubtitleEl) countdownSubtitleEl.textContent = SEMESTER_END;
-            if (ringEl) {
-              ringEl.style.strokeDashoffset = 0;
+            if (now < WINTER_BREAK) {
+              var daysToBreak = Math.ceil((WINTER_BREAK.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              if (countdownDaysEl) countdownDaysEl.textContent = String(daysToBreak);
+              if (countdownDaysTextEl) countdownDaysTextEl.textContent = String(daysToBreak);
+              if (countdownLabelEl) countdownLabelEl.textContent = '距寒假还有';
+              if (countdownUnitEl) countdownUnitEl.textContent = '天';
+              if (countdownSubtitleEl) countdownSubtitleEl.textContent = '考试结束，寒假在即';
+              if (ringEl) {
+                ringEl.style.strokeDashoffset = 0;
+              }
+            } else if (now < SPRING_START) {
+              var springMonth = SPRING_START.getMonth() + 1;
+              var springDay = SPRING_START.getDate();
+              if (countdownDaysEl) countdownDaysEl.textContent = '--';
+              if (countdownDaysTextEl) countdownDaysTextEl.textContent = '--';
+              if (countdownLabelEl) countdownLabelEl.textContent = '寒假中';
+              if (countdownUnitEl) countdownUnitEl.textContent = '· ' + springMonth + '月' + springDay + '日开学';
+              if (countdownSubtitleEl) countdownSubtitleEl.textContent = '假期愉快，注意休息';
+              if (ringEl) {
+                ringEl.style.strokeDashoffset = 0;
+              }
+            } else {
+              if (countdownDaysEl) countdownDaysEl.textContent = '--';
+              if (countdownDaysTextEl) countdownDaysTextEl.textContent = '--';
+              if (countdownLabelEl) countdownLabelEl.textContent = '学期已结束';
+              if (countdownUnitEl) countdownUnitEl.textContent = '';
+              if (countdownSubtitleEl) countdownSubtitleEl.textContent = SEMESTER_END;
+              if (ringEl) {
+                ringEl.style.strokeDashoffset = 0;
+              }
             }
           } else {
             const progress = Math.min(1, Math.max(0, dayOfSemester / SEMESTER_TOTAL_DAYS));
             const pct = Math.round(progress * 100);
             if (countdownDaysEl) countdownDaysEl.textContent = pct + '%';
             if (countdownDaysTextEl) countdownDaysTextEl.textContent = pct + '%';
-            if (countdownLabelEl) countdownLabelEl.textContent = '学期进度';
+            var phaseLabel = '学期进度';
+            if (now >= REVIEW_WEEK && now < EXAM_WEEK) {
+              phaseLabel = '复习周·冲刺！';
+            } else if (now >= EXAM_WEEK) {
+              phaseLabel = '考试周';
+            }
+            if (countdownLabelEl) countdownLabelEl.textContent = phaseLabel;
             if (countdownUnitEl) countdownUnitEl.textContent = '· 第 ' + dayOfSemester + '/' + SEMESTER_TOTAL_DAYS + ' 天';
             if (countdownSubtitleEl) countdownSubtitleEl.textContent = '';
             if (ringEl) {

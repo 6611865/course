@@ -1,7 +1,13 @@
 {
   "semester": {
     "start": "2026-08-31",
-    "totalWeeks": 18
+    "totalWeeks": 18,
+    "sessions": {
+      "reviewWeek": "2026-12-21",
+      "examWeek": "2027-01-04",
+      "winterBreak": "2027-01-16",
+      "springStart": "2027-02-22"
+    }
   },
   "schedule": {
     "0": [
