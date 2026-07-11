@@ -38,14 +38,14 @@ self.addEventListener('activate', function (event) {
 self.addEventListener('fetch', function (event) {
   if (event.request.method !== 'GET') return;
 
-  var url = event.request.url;
+  const url = event.request.url;
 
   // Google Fonts: CSS 文件使用 Network-First 策略
   if (url.indexOf('fonts.googleapis.com') !== -1) {
     event.respondWith(
       fetch(event.request).then(function (networkResponse) {
         if (networkResponse && networkResponse.status === 200) {
-          var responseToCache = networkResponse.clone();
+          const responseToCache = networkResponse.clone();
           caches.open(FONT_CACHE_NAME).then(function (cache) {
             cache.put(event.request, responseToCache);
           });
@@ -67,7 +67,7 @@ self.addEventListener('fetch', function (event) {
         }
         return fetch(event.request).then(function (networkResponse) {
           if (networkResponse && networkResponse.status === 200) {
-            var responseToCache = networkResponse.clone();
+            const responseToCache = networkResponse.clone();
             caches.open(FONT_CACHE_NAME).then(function (cache) {
               cache.put(event.request, responseToCache);
             });
@@ -87,7 +87,7 @@ self.addEventListener('fetch', function (event) {
       }
       return fetch(event.request).then(function (networkResponse) {
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
-          var responseToCache = networkResponse.clone();
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(function (cache) {
             cache.put(event.request, responseToCache);
           });

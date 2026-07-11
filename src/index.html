@@ -541,17 +541,17 @@
 
   <script>
     (function() {
-      var courseColorCache = {};
-      var COLOR_SEED = Math.floor(Math.random() * 360);
+      const courseColorCache = {};
+      const COLOR_SEED = Math.floor(Math.random() * 360);
 
       function getCourseColor(name, pos) {
-        var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-        var key = name + (isDark ? '-d' : '-l');
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        const key = name + (isDark ? '-d' : '-l');
         if (courseColorCache[key]) return courseColorCache[key];
-        var h = (hashCode(name) * 13 + COLOR_SEED) % 360;
+        let h = (hashCode(name) * 13 + COLOR_SEED) % 360;
         if (pos !== undefined) { h = (h + pos * 53) % 360; }
-        var s1 = 45 + (hashCode(name + 's1') % 25);
-        var s2 = 35 + (hashCode(name + 's2') % 20);
+        const s1 = 45 + (hashCode(name + 's1') % 25);
+        const s2 = 35 + (hashCode(name + 's2') % 20);
         if (isDark) {
           courseColorCache[key] = {
             bg:    'hsl(' + h + ', 20%, 13%)',
@@ -571,7 +571,7 @@
       }
 
       function hashCode(str) {
-        var hash = 0, i, chr;
+        let hash = 0, i, chr;
         for (i = 0; i < str.length; i++) {
           chr = str.charCodeAt(i);
           hash = ((hash << 5) - hash) + chr;
@@ -581,7 +581,7 @@
       }
 
       function escapeHtml(str) {
-        var div = document.createElement('div');
+        const div = document.createElement('div');
         div.appendChild(document.createTextNode(str));
         return div.innerHTML;
       }
@@ -622,8 +622,8 @@
       // 课程备注系统
       window.courseMemos = {};
       (function() {
-        for (var i = 0; i < localStorage.length; i++) {
-          var key = localStorage.key(i);
+        for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
           if (key.indexOf('course_memo_') === 0) {
             window.courseMemos[decodeURIComponent(key.slice(12))] = localStorage.getItem(key);
           }
@@ -635,9 +635,9 @@
 
       const TOTAL_WEEKS = 18;
       const CURRENT_WEEK = (function() {
-        var now = new Date();
-        var diffMs = now.getTime() - SEMESTER_START.getTime();
-        var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const now = new Date();
+        const diffMs = now.getTime() - SEMESTER_START.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         if (diffDays < 0) return 0;
         return Math.min(TOTAL_WEEKS, Math.floor(diffDays / 7) + 1);
       })();
@@ -650,31 +650,31 @@
       const SEMESTER_TOTAL_DAYS = 18 * 7; // 126天
 
       function updateCountdown(simulatedNow) {
-        var now = simulatedNow || new Date();
-        var startDiff = SEMESTER_START.getTime() - now.getTime();
-        var countdownDaysEl = document.getElementById('countdown-days');
-        var countdownDaysTextEl = document.getElementById('countdown-days-text');
-        var countdownLabelEl = document.getElementById('countdown-label');
-        var countdownUnitEl = document.getElementById('countdown-unit');
-        var countdownSubtitleEl = document.getElementById('countdown-subtitle');
-        var ringEl = document.querySelector('.countdown-ring');
+        const now = simulatedNow || new Date();
+        const startDiff = SEMESTER_START.getTime() - now.getTime();
+        const countdownDaysEl = document.getElementById('countdown-days');
+        const countdownDaysTextEl = document.getElementById('countdown-days-text');
+        const countdownLabelEl = document.getElementById('countdown-label');
+        const countdownUnitEl = document.getElementById('countdown-unit');
+        const countdownSubtitleEl = document.getElementById('countdown-subtitle');
+        const ringEl = document.querySelector('.countdown-ring');
 
         if (startDiff > 0) {
           // 开学前：倒计时模式
-          var daysLeft = Math.max(0, Math.ceil(startDiff / (1000 * 60 * 60 * 24)));
+          const daysLeft = Math.max(0, Math.ceil(startDiff / (1000 * 60 * 60 * 24)));
           if (countdownDaysEl) countdownDaysEl.textContent = String(daysLeft);
           if (countdownDaysTextEl) countdownDaysTextEl.textContent = String(daysLeft);
           if (countdownLabelEl) countdownLabelEl.textContent = '距开学还有';
           if (countdownUnitEl) countdownUnitEl.textContent = '天';
           if (countdownSubtitleEl) countdownSubtitleEl.textContent = '暑假愉快，提前规划新学期 \u2728';
           if (ringEl) {
-            var offset = (1 - Math.min(1, Math.max(0, daysLeft / 92))) * 283;
+            let offset = (1 - Math.min(1, Math.max(0, daysLeft / 92))) * 283;
             ringEl.style.strokeDashoffset = Math.round(offset);
           }
         } else {
           // 开学后：学期进度模式
-          var elapsedMs = now.getTime() - SEMESTER_START.getTime();
-          var dayOfSemester = Math.min(SEMESTER_TOTAL_DAYS, Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1));
+          const elapsedMs = now.getTime() - SEMESTER_START.getTime();
+          const dayOfSemester = Math.min(SEMESTER_TOTAL_DAYS, Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1));
           if (dayOfSemester > SEMESTER_TOTAL_DAYS) {
             // 学期已结束
             if (countdownDaysEl) countdownDaysEl.textContent = '--';
@@ -682,24 +682,24 @@
             if (countdownLabelEl) countdownLabelEl.textContent = '学期已结束';
             if (countdownUnitEl) countdownUnitEl.textContent = '';
             if (countdownSubtitleEl) countdownSubtitleEl.textContent = '2026.8.31 - ' + 
-              (function(){ var end = new Date(SEMESTER_START.getTime() + SEMESTER_TOTAL_DAYS * 24 * 60 * 60 * 1000); return end.getFullYear() + '.' + (end.getMonth()+1) + '.' + end.getDate(); })();
+              (function(){ const end = new Date(SEMESTER_START.getTime() + SEMESTER_TOTAL_DAYS * 24 * 60 * 60 * 1000); return end.getFullYear() + '.' + (end.getMonth()+1) + '.' + end.getDate(); })();
             if (ringEl) {
               ringEl.style.strokeDashoffset = 0;
             }
           } else {
-            var progress = Math.min(1, Math.max(0, dayOfSemester / SEMESTER_TOTAL_DAYS));
-            var pct = Math.round(progress * 100);
+            const progress = Math.min(1, Math.max(0, dayOfSemester / SEMESTER_TOTAL_DAYS));
+            const pct = Math.round(progress * 100);
             if (countdownDaysEl) countdownDaysEl.textContent = pct + '%';
             if (countdownDaysTextEl) countdownDaysTextEl.textContent = pct + '%';
             if (countdownLabelEl) countdownLabelEl.textContent = '学期进度';
             if (countdownUnitEl) countdownUnitEl.textContent = '· 第 ' + dayOfSemester + '/' + SEMESTER_TOTAL_DAYS + ' 天';
             if (countdownSubtitleEl) countdownSubtitleEl.textContent = '';
             if (ringEl) {
-              var offset = (1 - progress) * 283;
+              let offset = (1 - progress) * 283;
               ringEl.style.strokeDashoffset = Math.round(offset);
               // 绿→黄→红 渐变
-              var hue = 120 - progress * 120;
-              var isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+              const hue = 120 - progress * 120;
+              const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
               ringEl.style.stroke = 'hsl(' + Math.round(hue) + ', ' + (isDark ? '60%' : '70%') + ', ' + (isDark ? '55%' : '50%') + ')';
             }
           }
@@ -708,9 +708,9 @@
       }
 
       function parseTimeToMinutes(timeStr) {
-        var parts = timeStr.split('-');
-        var startParts = parts[0].split(':');
-        var endParts = parts[1].split(':');
+        const parts = timeStr.split('-');
+        const startParts = parts[0].split(':');
+        const endParts = parts[1].split(':');
         return {
           start: parseInt(startParts[0]) * 60 + parseInt(startParts[1]),
           end: parseInt(endParts[0]) * 60 + parseInt(endParts[1])
@@ -718,29 +718,29 @@
       }
 
       function isCourseNow(timeStr, simulatedNow) {
-        var now = simulatedNow || new Date();
-        var range = parseTimeToMinutes(timeStr);
-        var nowMin = now.getHours() * 60 + now.getMinutes();
+        const now = simulatedNow || new Date();
+        const range = parseTimeToMinutes(timeStr);
+        const nowMin = now.getHours() * 60 + now.getMinutes();
         return nowMin >= range.start && nowMin < range.end;
       }
 
       function isCourseSoon(timeStr, simulatedNow) {
-        var now = simulatedNow || new Date();
-        var range = parseTimeToMinutes(timeStr);
-        var nowMin = now.getHours() * 60 + now.getMinutes();
+        const now = simulatedNow || new Date();
+        const range = parseTimeToMinutes(timeStr);
+        const nowMin = now.getHours() * 60 + now.getMinutes();
         return nowMin < range.start && range.start - nowMin <= 40;
       }
 
       function getDayDate(dayIndex) {
         if (selectedWeek === 0) {
-          var now = new Date();
-          var day = now.getDay();
-          var mondayOffset = day === 0 ? -6 : 1 - day;
-          var d = new Date(now);
+          const now = new Date();
+          let day = now.getDay();
+          const mondayOffset = day === 0 ? -6 : 1 - day;
+          let d = new Date(now);
           d.setDate(now.getDate() + mondayOffset + dayIndex);
           return (d.getMonth() + 1) + '.' + d.getDate();
         }
-        var d = new Date(SEMESTER_START);
+        let d = new Date(SEMESTER_START);
         d.setDate(d.getDate() + (selectedWeek - 1) * 7 + dayIndex);
         return (d.getMonth() + 1) + '.' + d.getDate();
       }
@@ -756,8 +756,8 @@
       const headerWeekEl = document.getElementById('header-week');
 
       function getFilteredCourses(dayIndex) {
-        var week = selectedWeek === 0 ? 1 : selectedWeek;
-        var all = SCHEDULE[dayIndex] || [];
+        const week = selectedWeek === 0 ? 1 : selectedWeek;
+        const all = SCHEDULE[dayIndex] || [];
         return all.filter(function(c) {
           if (!c.weekType) return true;
           return c.weekType === getParity(week);
@@ -767,7 +767,7 @@
       function buildTabs() {
         tabsContainer.innerHTML = '';
         DAY_LABELS.forEach(function(label, i) {
-          var filtered = getFilteredCourses(i);
+          const filtered = getFilteredCourses(i);
           const hasCourses = filtered.length > 0;
           const isToday = i === todayIndex;
           const btn = document.createElement('button');
@@ -802,16 +802,16 @@
       }
 
       function renderCourses() {
-        var courses = getFilteredCourses(activeDay);
+        const courses = getFilteredCourses(activeDay);
 
         if (courses.length === 0) {
           courseListEl.innerHTML = '';
           courseListEl.classList.add('hidden');
           emptyStateEl.classList.remove('hidden');
           // 根据星期几给出不同文案
-          var emptyMain = document.getElementById('empty-main');
-          var emptySub = document.getElementById('empty-sub');
-          var dayLabel = DAY_LABELS[activeDay];
+          const emptyMain = document.getElementById('empty-main');
+          const emptySub = document.getElementById('empty-sub');
+          const dayLabel = DAY_LABELS[activeDay];
           if (activeDay === 5 || activeDay === 6) {
             if (emptyMain) emptyMain.textContent = '周末愉快！今天没有课程安排~';
             if (emptySub) emptySub.textContent = '好好享受周末时光吧';
@@ -828,12 +828,12 @@
         courseListEl.classList.remove('hidden');
         emptyStateEl.classList.add('hidden');
 
-        var html = '';
+        let html = '';
         courses.forEach(function(c, idx) {
-          var color = getCourseColor(c.name, idx);
-          var isNow = activeDay === todayIndex && isCourseNow(c.time);
-          var isSoon = activeDay === todayIndex && !isNow && isCourseSoon(c.time);
-          var tagHtml = '';
+          let color = getCourseColor(c.name, idx);
+          const isNow = activeDay === todayIndex && isCourseNow(c.time);
+          const isSoon = activeDay === todayIndex && !isNow && isCourseSoon(c.time);
+          let tagHtml = '';
           if (isNow) {
             tagHtml = '<span class="badge-now">● 正在上课</span>';
           } else if (isSoon) {
@@ -845,10 +845,10 @@
             tagHtml += '<span class="badge-experiment' + (isNow || isSoon ? ' ml-1' : '') + '">实验课</span><span class="badge-odd-week ml-1">单周</span>';
           }
 
-          var isLab = c.location === '机房';
+          const isLab = c.location === '机房';
 
-          var cardClass = 'course-card p-4 animate-in' + (isNow ? ' now-active' : isSoon ? ' soon-active' : '');
-          var cardStyle = 'background:' + color.bg + '; border:1px solid ' + color.border + '; animation-delay:' + (0.05 * idx) + 's;';
+          const cardClass = 'course-card p-4 animate-in' + (isNow ? ' now-active' : isSoon ? ' soon-active' : '');
+          let cardStyle = 'background:' + color.bg + '; border:1px solid ' + color.border + '; animation-delay:' + (0.05 * idx) + 's;';
           if (isNow || isSoon) {
             cardStyle += ' --glow-color: ' + color.dot + ';';
           }
@@ -890,13 +890,13 @@
 
       // 备注按钮事件委托
       courseListEl.addEventListener('click', function(e) {
-        var btn = e.target.closest('.memo-btn');
+        const btn = e.target.closest('.memo-btn');
         if (!btn) return;
-        var courseName = btn.dataset.course;
-        var current = window.courseMemos[courseName] || '';
-        var input = prompt('请输入「' + courseName + '」的备注：', current);
+        const courseName = btn.dataset.course;
+        const current = window.courseMemos[courseName] || '';
+        const input = prompt('请输入「' + courseName + '」的备注：', current);
         if (input === null) return;
-        var trimmed = input.trim();
+        const trimmed = input.trim();
         if (trimmed === '') {
           delete window.courseMemos[courseName];
           localStorage.removeItem('course_memo_' + encodeURIComponent(courseName));
@@ -920,8 +920,8 @@
           updateHeaderWeek(simulatedNow);
           return;
         }
-        var parity = getParity(selectedWeek);
-        var isOdd = parity === 'odd';
+        const parity = getParity(selectedWeek);
+        const isOdd = parity === 'odd';
         weekBadgeEl.textContent = '第 ' + selectedWeek + ' 周 · ' + (isOdd ? '单周' : '双周');
         weekBadgeEl.style.background = isOdd ? 'var(--badge-odd-bg)' : 'var(--badge-even-bg)';
         weekBadgeEl.style.color = isOdd ? 'var(--badge-odd-text)' : 'var(--badge-even-text)';
@@ -937,26 +937,26 @@
       }
 
       function getCurrentWeek(simulatedNow) {
-        var now = simulatedNow || new Date();
-        var diffMs = now.getTime() - SEMESTER_START.getTime();
-        var diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        const now = simulatedNow || new Date();
+        const diffMs = now.getTime() - SEMESTER_START.getTime();
+        const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
         if (diffDays < 0) return 0;
         return Math.min(TOTAL_WEEKS, Math.floor(diffDays / 7) + 1);
       }
 
       function getWeekZeroLabel() {
-        var now = new Date();
-        var day = now.getDay();
-        var mondayOffset = day === 0 ? -6 : 1 - day;
-        var monday = new Date(now);
+        const now = new Date();
+        let day = now.getDay();
+        const mondayOffset = day === 0 ? -6 : 1 - day;
+        const monday = new Date(now);
         monday.setDate(now.getDate() + mondayOffset);
-        var sunday = new Date(monday);
+        const sunday = new Date(monday);
         sunday.setDate(monday.getDate() + 6);
         return (monday.getMonth() + 1) + '/' + monday.getDate() + '-' + (sunday.getMonth() + 1) + '/' + sunday.getDate();
       }
 
       function updateHeaderWeek(simulatedNow) {
-        var week = getCurrentWeek(simulatedNow);
+        const week = getCurrentWeek(simulatedNow);
         if (week === 0) {
           headerWeekEl.textContent = '未开学';
         } else {
@@ -975,7 +975,7 @@
 
       weekPrevEl.addEventListener('click', function() { setWeek(selectedWeek - 1); });
       weekNextEl.addEventListener('click', function() { setWeek(selectedWeek + 1); });
-      var weekTodayEl = document.getElementById('week-today');
+      const weekTodayEl = document.getElementById('week-today');
       if (weekTodayEl) weekTodayEl.addEventListener('click', function() { setWeek(CURRENT_WEEK); });
 
       updateWeekUI();
@@ -984,29 +984,29 @@
       updateCountdown();
 
       // ─── Hide skeleton screen ───
-      var skeletonEl = document.getElementById('skeleton');
+      const skeletonEl = document.getElementById('skeleton');
       if (skeletonEl) { skeletonEl.style.display = 'none'; }
 
       // ─── View toggle (day / week) ───
-      var isWeekView = false;
-      var viewToggleBtn = document.getElementById('view-toggle');
-      var viewIconDay = document.getElementById('view-icon-day');
-      var viewIconWeek = document.getElementById('view-icon-week');
-      var dayViewEl = document.getElementById('day-view');
-      var weekViewEl = document.getElementById('week-view');
+      let isWeekView = false;
+      const viewToggleBtn = document.getElementById('view-toggle');
+      const viewIconDay = document.getElementById('view-icon-day');
+      const viewIconWeek = document.getElementById('view-icon-week');
+      const dayViewEl = document.getElementById('day-view');
+      const weekViewEl = document.getElementById('week-view');
 
       function renderWeekView() {
-        var html = '';
-        for (var i = 0; i < 7; i++) {
-          var courses = getFilteredCourses(i);
-          var dateStr = getDayDate(i);
+        let html = '';
+        for (let i = 0; i < 7; i++) {
+          const courses = getFilteredCourses(i);
+          const dateStr = getDayDate(i);
           html += '<div class="week-day-section">';
           html += '<div class="week-day-header">' + DAY_LABELS[i] + '<span class="date">' + dateStr + '</span></div>';
           if (courses.length === 0) {
             html += '<div class="week-empty">这天没有课</div>';
           } else {
             courses.forEach(function(c, idx) {
-              var color = getCourseColor(c.name, idx);
+              const color = getCourseColor(c.name, idx);
               html += '<div class="week-course-row" style="background:' + color.bg + '; border:1px solid ' + color.border + ';">';
               html += '<span class="wc-time">' + c.time + '</span>';
               html += '<span class="wc-name">' + c.name + '</span>';
@@ -1049,7 +1049,7 @@
   <script>
     // ─── Theme detection ───
     (function() {
-      var mq = window.matchMedia('(prefers-color-scheme: dark)');
+      const mq = window.matchMedia('(prefers-color-scheme: dark)');
       function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); window.renderCourses(); }
       apply();
       mq.addEventListener('change', apply);
@@ -1061,13 +1061,13 @@
 
     // ─── SW registration + update toast ───
     if ('serviceWorker' in navigator) {
-      var swToastShown = false;
+      let swToastShown = false;
       navigator.serviceWorker.register('sw.js').then(function (reg) {
-        console.log('SW registered: ' + reg.scope);
+        // SW registered successfully
 
         // Check for updates on page load
         reg.addEventListener('updatefound', function() {
-          var newWorker = reg.installing;
+          const newWorker = reg.installing;
           if (!newWorker) return;
           newWorker.addEventListener('statechange', function() {
             if (newWorker.state === 'installed' && navigator.serviceWorker.controller && !swToastShown) {
@@ -1094,7 +1094,7 @@
       });
 
       function showUpdateToast() {
-        var toast = document.createElement('div');
+        const toast = document.createElement('div');
         toast.className = 'sw-toast';
         toast.textContent = '有新版本，点击刷新';
         toast.addEventListener('click', function() {
