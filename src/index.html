@@ -607,7 +607,7 @@
         }
       })();
 
-      let SEMESTER_START, TOTAL_WEEKS, CURRENT_WEEK, selectedWeek, SEMESTER_TOTAL_DAYS = 0, COUNTDOWN_MAX_DAYS = 92;
+      let SEMESTER_START, TOTAL_WEEKS, CURRENT_WEEK, selectedWeek, SEMESTER_TOTAL_DAYS = 0, COUNTDOWN_MAX_DAYS = 92, SEMESTER_END = '';
 
       // ─── Config loading & bootstrap ───
       (async function init() {
@@ -615,10 +615,11 @@
           const config = await fetch('config.json').then(function(r) { return r.json(); });
           if (!config || !config.schedule || !config.semester) throw new Error('Invalid config');
           SCHEDULE = config.schedule;
-          SEMESTER_START = new Date(config.semester.start);
+          SEMESTER_START = new Date(config.semester.start + 'T00:00:00');
           TOTAL_WEEKS = config.semester.totalWeeks;
           SEMESTER_TOTAL_DAYS = TOTAL_WEEKS * 7;
           COUNTDOWN_MAX_DAYS = Math.max(92, Math.ceil((SEMESTER_START.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
+          do { const s = SEMESTER_START; const e = new Date(s.getTime() + SEMESTER_TOTAL_DAYS * 86400000); SEMESTER_END = s.getFullYear() + '.' + (s.getMonth() + 1) + '.' + s.getDate() + ' - ' + e.getFullYear() + '.' + (e.getMonth() + 1) + '.' + e.getDate(); } while (0);
 
           CURRENT_WEEK = getCurrentWeek();
           selectedWeek = CURRENT_WEEK;
@@ -671,7 +672,8 @@
           if (countdownDaysTextEl) countdownDaysTextEl.textContent = String(daysLeft);
           if (countdownLabelEl) countdownLabelEl.textContent = '距开学还有';
           if (countdownUnitEl) countdownUnitEl.textContent = '天';
-          if (countdownSubtitleEl) countdownSubtitleEl.textContent = '暑假愉快，提前规划新学期 \u2728';
+          const vacationLabel = (SEMESTER_START.getMonth() >= 2 && SEMESTER_START.getMonth() < 8) ? '寒假愉快' : '暑假愉快';
+          if (countdownSubtitleEl) countdownSubtitleEl.textContent = vacationLabel + '，提前规划新学期 \u2728';
           if (ringEl) {
             let offset = (1 - Math.min(1, Math.max(0, daysLeft / COUNTDOWN_MAX_DAYS))) * 283;
             ringEl.style.strokeDashoffset = Math.round(offset);
@@ -686,8 +688,7 @@
             if (countdownDaysTextEl) countdownDaysTextEl.textContent = '--';
             if (countdownLabelEl) countdownLabelEl.textContent = '学期已结束';
             if (countdownUnitEl) countdownUnitEl.textContent = '';
-            if (countdownSubtitleEl) countdownSubtitleEl.textContent = '2026.8.31 - ' + 
-              (function(){ const end = new Date(SEMESTER_START.getTime() + SEMESTER_TOTAL_DAYS * 24 * 60 * 60 * 1000); return end.getFullYear() + '.' + (end.getMonth()+1) + '.' + end.getDate(); })();
+            if (countdownSubtitleEl) countdownSubtitleEl.textContent = SEMESTER_END;
             if (ringEl) {
               ringEl.style.strokeDashoffset = 0;
             }
