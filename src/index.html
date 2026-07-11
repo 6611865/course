@@ -22,8 +22,8 @@
   <style>
     :root {
       /* Accent */
-      --accent: #D97757;
-      --accent-glow: hsl(160, 55%, 65%);
+      --btn-today-accent: #D97757;
+      --ring-accent: hsl(160, 55%, 65%);
       /* Backgrounds */
       --bg-body: linear-gradient(170deg, hsl(200, 30%, 97%) 0%, hsl(220, 25%, 98%) 40%, hsl(260, 20%, 97%) 100%);
       --bg-card: hsl(0, 0%, 100%, 0.75);
@@ -50,8 +50,9 @@
       --shadow-card: 0 2px 24px hsl(220, 20%, 88%, 0.5);
       /* Ring */
       --ring-bg: hsl(220, 15%, 90%);
-      --ring-fg: hsl(160, 55%, 65%);
+      --ring-fg: var(--ring-accent);
       --ring-text: hsl(220, 15%, 30%);
+      --ring-circumference: 283;
       /* Week badge */
       --badge-odd-bg: hsl(265, 55%, 94%);
       --badge-odd-text: hsl(265, 50%, 50%);
@@ -80,8 +81,8 @@
     }
 
     [data-theme="dark"] {
-      --accent: #E68B6B;
-      --accent-glow: #E68B6B;
+      --btn-today-accent: #E68B6B;
+      --ring-accent: #E68B6B;
       --bg-body: hsl(220, 15%, 12%);
       --bg-card: hsl(220, 15%, 16%, 0.85);
       --bg-tab-active: hsl(220, 15%, 22%);
@@ -103,7 +104,7 @@
       --border-stepper: hsl(220, 15%, 25%);
       --shadow-card: 0 2px 24px hsl(220, 15%, 5%, 0.6);
       --ring-bg: hsl(220, 15%, 22%);
-      --ring-fg: #E68B6B;
+      --ring-fg: var(--ring-accent);
       --ring-text: hsl(220, 10%, 82%);
       --badge-odd-bg: hsl(265, 20%, 22%);
       --badge-odd-text: hsl(265, 40%, 65%);
@@ -210,7 +211,7 @@
     }
 
     .countdown-ring {
-      stroke-dasharray: 283;
+      stroke-dasharray: var(--ring-circumference, 283);
       transition: stroke-dashoffset 0.6s ease;
     }
 
@@ -260,7 +261,7 @@
       display: flex; align-items: center; justify-content: center; cursor: pointer;
       user-select: none; -webkit-user-select: none; -webkit-tap-highlight-color: transparent;
       transition: all 0.2s ease; background: var(--bg-stepper); border: 1px solid var(--border-stepper);
-      color: var(--accent); flex-shrink: 0; font-size: 0.6rem; font-weight: 700; line-height: 1;
+      color: var(--btn-today-accent); flex-shrink: 0; font-size: 0.6rem; font-weight: 700; line-height: 1;
     }
     .today-btn:active { transform: scale(0.9); background: var(--stepper-hover-bg); }
     .today-btn.hidden { display: none; }
@@ -531,10 +532,10 @@
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const key = name + (isDark ? '-d' : '-l');
         if (courseColorCache[key]) return courseColorCache[key];
-        let h = (hashCode(name) * 13 + COLOR_SEED) % 360;
-        if (pos !== undefined) { h = (h + pos * 53) % 360; }
-        const s1 = 45 + (hashCode(name + 's1') % 25);
-        const s2 = 35 + (hashCode(name + 's2') % 20);
+        let h = (hashCode(name) * COLOR_HUE_MULT + COLOR_SEED) % 360;
+        if (pos !== undefined) { h = (h + pos * COLOR_POS_SHIFT) % 360; }
+        const s1 = COLOR_SAT_BASE + (hashCode(name + 's1') % COLOR_SAT_RANGE);
+        const s2 = COLOR_LIGHT_BASE + (hashCode(name + 's2') % COLOR_LIGHT_RANGE);
         if (isDark) {
           courseColorCache[key] = {
             bg:    'hsl(' + h + ', 20%, 13%)',
@@ -571,6 +572,17 @@
 
       const DAY_LABELS = ['周一', '周二', '周三', '周四', '周五', '周六', '周日'];
       const DAY_SHORT  = ['一', '二', '三', '四', '五', '六', '日'];
+
+      // ─── Constants ───
+      const RING_CIRCUMFERENCE = 2 * Math.PI * 45; // 283 — SVG 圆环周长
+      const SW_UPDATE_INTERVAL = 60 * 60 * 1000;   // 1 小时
+      const TOAST_DURATION = 15000;                 // 15 秒
+      const COLOR_HUE_MULT = 13;                    // 色相倍数
+      const COLOR_POS_SHIFT = 53;                   // 位置偏移
+      const COLOR_SAT_BASE = 45;                    // 饱和度基数
+      const COLOR_SAT_RANGE = 25;                   // 饱和度浮动范围
+      const COLOR_LIGHT_BASE = 35;                  // 亮度基数
+      const COLOR_LIGHT_RANGE = 20;                 // 亮度浮动范围
 
       let SCHEDULE;
 
@@ -669,7 +681,7 @@
           const vacationLabel = (SEMESTER_START.getMonth() >= 2 && SEMESTER_START.getMonth() < 8) ? '寒假愉快' : '暑假愉快';
           if (countdownSubtitleEl) countdownSubtitleEl.textContent = vacationLabel + '，提前规划新学期 \u2728';
           if (ringEl) {
-            let offset = (1 - Math.min(1, Math.max(0, daysLeft / COUNTDOWN_MAX_DAYS))) * 283;
+            let offset = (1 - Math.min(1, Math.max(0, daysLeft / COUNTDOWN_MAX_DAYS))) * RING_CIRCUMFERENCE;
             ringEl.style.strokeDashoffset = Math.round(offset);
           }
         } else {
@@ -695,7 +707,7 @@
             if (countdownUnitEl) countdownUnitEl.textContent = '· 第 ' + dayOfSemester + '/' + SEMESTER_TOTAL_DAYS + ' 天';
             if (countdownSubtitleEl) countdownSubtitleEl.textContent = '';
             if (ringEl) {
-              let offset = (1 - progress) * 283;
+              let offset = (1 - progress) * RING_CIRCUMFERENCE;
               ringEl.style.strokeDashoffset = Math.round(offset);
               // 绿→黄→红 渐变
               const hue = 120 - progress * 120;
@@ -774,6 +786,7 @@
           const btn = document.createElement('button');
           btn.className = 'day-tab flex-shrink-0 flex flex-col items-center justify-center w-12 h-16 rounded-2xl text-xs font-medium transition-colors';
           btn.setAttribute('data-day', String(i));
+          btn.setAttribute('aria-label', label + ' ' + getDayDate(i));
 
           if (i === activeDay) {
             btn.classList.add('active');
@@ -788,7 +801,7 @@
           btn.innerHTML =
             '<span class="text-[0.65rem] leading-none mb-0.5 opacity-70">' + DAY_SHORT[i] + '</span>' +
             '<span class="text-[0.6rem] leading-none font-semibold">' + getDayDate(i) + '</span>' +
-            (isToday ? '<span class="w-1 h-1 rounded-full mt-0.5" style="background:' + (i === activeDay ? 'var(--accent-glow)' : 'var(--text-muted)') + '"></span>' : '');
+            (isToday ? '<span class="w-1 h-1 rounded-full mt-0.5" style="background:' + (i === activeDay ? 'var(--ring-accent)' : 'var(--text-muted)') + '"></span>' : '');
 
           btn.addEventListener('click', function() { switchDay(i); });
           tabsContainer.appendChild(btn);
@@ -964,6 +977,14 @@
         }
       }
 
+      function debounce(fn, ms) {
+        let timer;
+        return function() {
+          clearTimeout(timer);
+          timer = setTimeout(function() { fn.apply(this, arguments); }, ms);
+        };
+      }
+
       function setWeek(week) {
         if (week < 0 || week > TOTAL_WEEKS || week === selectedWeek) return;
         selectedWeek = week;
@@ -973,8 +994,9 @@
         if (isWeekView) renderWeekView();
       }
 
-      weekPrevEl.addEventListener('click', function() { setWeek(selectedWeek - 1); });
-      weekNextEl.addEventListener('click', function() { setWeek(selectedWeek + 1); });
+      const debouncedSetWeek = debounce(setWeek, 200);
+      weekPrevEl.addEventListener('click', function() { debouncedSetWeek(selectedWeek - 1); });
+      weekNextEl.addEventListener('click', function() { debouncedSetWeek(selectedWeek + 1); });
       const weekTodayEl = document.getElementById('week-today');
       if (weekTodayEl) weekTodayEl.addEventListener('click', function() { setWeek(CURRENT_WEEK); });
 
@@ -1073,7 +1095,7 @@
         // Also check periodically
         setInterval(function() {
           reg.update();
-        }, 60 * 60 * 1000);
+        }, SW_UPDATE_INTERVAL);
       }).catch(function (err) {
       });
 
@@ -1096,7 +1118,7 @@
         setTimeout(function() {
           if (toast.parentNode) toast.parentNode.removeChild(toast);
           swToastShown = false;
-        }, 15000);
+        }, TOAST_DURATION);
       }
     }
   </script>
