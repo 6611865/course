@@ -696,7 +696,7 @@
         } else {
           // 开学后：学期进度模式
           const elapsedMs = now.getTime() - SEMESTER_START.getTime();
-          const dayOfSemester = Math.min(SEMESTER_TOTAL_DAYS, Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1));
+          const dayOfSemester = Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1);
           if (dayOfSemester > SEMESTER_TOTAL_DAYS) {
             if (now < WINTER_BREAK) {
               var daysToBreak = Math.ceil((WINTER_BREAK.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
@@ -755,6 +755,7 @@
         }
         updateHeaderWeek();
       }
+      window.updateCountdown = updateCountdown;
 
       function parseTimeToMinutes(timeStr) {
         const parts = timeStr.split('-');
@@ -1104,7 +1105,7 @@
     // ─── Theme detection ───
     (function() {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); if (typeof SCHEDULE !== 'undefined') window.renderCourses(); }
+      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); if (typeof SCHEDULE !== 'undefined') { window.renderCourses(); window.updateCountdown(); } }
       apply();
       mq.addEventListener('change', apply);
       // iOS PWA: matchMedia change event doesn't fire in standalone mode; re-check on visibility change (app back to foreground)
