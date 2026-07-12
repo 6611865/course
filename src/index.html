@@ -1113,7 +1113,7 @@
     // ─── Theme detection ───
     (function() {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); if (typeof SCHEDULE !== 'undefined') { window.renderCourses(); window.updateCountdown(); } }
+      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); requestAnimationFrame(() => { if (typeof window.renderCourses === 'function') { window.renderCourses(); } }); }
       apply();
       mq.addEventListener('change', apply);
       // iOS PWA: matchMedia change event doesn't fire in standalone mode; re-check on visibility change (app back to foreground)
