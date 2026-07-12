@@ -709,6 +709,7 @@
               if (countdownSubtitleEl) countdownSubtitleEl.textContent = '考试结束，寒假在即';
               if (ringEl) {
                 ringEl.style.strokeDashoffset = 0;
+                ringEl.style.stroke = '';
               }
             } else if (now < SPRING_START) {
               var springMonth = SPRING_START.getMonth() + 1;
@@ -720,6 +721,7 @@
               if (countdownSubtitleEl) countdownSubtitleEl.textContent = '假期愉快，注意休息';
               if (ringEl) {
                 ringEl.style.strokeDashoffset = 0;
+                ringEl.style.stroke = '';
               }
             } else {
               if (countdownDaysEl) countdownDaysEl.textContent = '--';
@@ -729,6 +731,7 @@
               if (countdownSubtitleEl) countdownSubtitleEl.textContent = SEMESTER_END;
               if (ringEl) {
                 ringEl.style.strokeDashoffset = 0;
+                ringEl.style.stroke = '';
               }
             }
           } else {
