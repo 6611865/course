@@ -615,6 +615,7 @@
       })();
 
       let SEMESTER_START, TOTAL_WEEKS, CURRENT_WEEK, selectedWeek, SEMESTER_TOTAL_DAYS = 0, COUNTDOWN_MAX_DAYS = 92, SEMESTER_END = '';
+      let REVIEW_WEEK, EXAM_WEEK, WINTER_BREAK, SPRING_START;
 
       // ─── Config loading & bootstrap ───
       (async function init() {
@@ -627,10 +628,10 @@
           SEMESTER_TOTAL_DAYS = TOTAL_WEEKS * 7;
           COUNTDOWN_MAX_DAYS = Math.max(92, Math.ceil((SEMESTER_START.getTime() - Date.now()) / (1000 * 60 * 60 * 24)));
           do { const s = SEMESTER_START; const e = new Date(s.getTime() + SEMESTER_TOTAL_DAYS * 86400000); SEMESTER_END = s.getFullYear() + '.' + (s.getMonth() + 1) + '.' + s.getDate() + ' - ' + e.getFullYear() + '.' + (e.getMonth() + 1) + '.' + e.getDate(); } while (0);
-          const REVIEW_WEEK = new Date(config.semester.sessions.reviewWeek + 'T00:00:00');
-          const EXAM_WEEK = new Date(config.semester.sessions.examWeek + 'T00:00:00');
-          const WINTER_BREAK = new Date(config.semester.sessions.winterBreak + 'T00:00:00');
-          const SPRING_START = new Date(config.semester.sessions.springStart + 'T00:00:00');
+          REVIEW_WEEK = new Date(config.semester.sessions.reviewWeek + 'T00:00:00');
+          EXAM_WEEK = new Date(config.semester.sessions.examWeek + 'T00:00:00');
+          WINTER_BREAK = new Date(config.semester.sessions.winterBreak + 'T00:00:00');
+          SPRING_START = new Date(config.semester.sessions.springStart + 'T00:00:00');
 
           CURRENT_WEEK = getCurrentWeek();
           selectedWeek = CURRENT_WEEK;
@@ -1016,8 +1017,10 @@
       function debounce(fn, ms) {
         let timer;
         return function() {
+          var args = arguments;
+          var ctx = this;
           clearTimeout(timer);
-          timer = setTimeout(function() { fn.apply(this, arguments); }, ms);
+          timer = setTimeout(function() { fn.apply(ctx, args); }, ms);
         };
       }
 
