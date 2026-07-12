@@ -684,8 +684,10 @@
           if (countdownLabelEl) countdownLabelEl.textContent = '距开学还有';
           if (countdownUnitEl) countdownUnitEl.textContent = '天';
           const vacationLabel = (SEMESTER_START.getMonth() >= 1 && SEMESTER_START.getMonth() < 7) ? '寒假愉快' : '暑假愉快';
-          if (daysLeft <= 3) {
-            if (countdownSubtitleEl) countdownSubtitleEl.textContent = '8.29-8.30 记得报到注册';
+          if (daysLeft <= 2) {
+            const regStart = new Date(SEMESTER_START.getTime() - 2 * 86400000);
+            const regEnd = new Date(SEMESTER_START.getTime() - 86400000);
+            if (countdownSubtitleEl) countdownSubtitleEl.textContent = (regStart.getMonth() + 1) + '.' + regStart.getDate() + '-' + (regEnd.getMonth() + 1) + '.' + regEnd.getDate() + ' 记得报到注册';
           } else {
             if (countdownSubtitleEl) countdownSubtitleEl.textContent = vacationLabel + '，提前规划新学期 \u2728';
           }
