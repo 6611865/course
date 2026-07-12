@@ -672,7 +672,7 @@
         const countdownLabelEl = document.getElementById('countdown-label');
         const countdownUnitEl = document.getElementById('countdown-unit');
         const countdownSubtitleEl = document.getElementById('countdown-subtitle');
-        const ringEl = document.querySelector('.countdown-ring');
+        const ringEl = document.querySelector('.countdown-ring') || {};
         if (countdownDaysEl) countdownDaysEl.classList.remove('sk-pulse');
         if (countdownDaysTextEl) countdownDaysTextEl.classList.remove('sk-pulse');
 
@@ -701,7 +701,7 @@
           const dayOfSemester = Math.max(1, Math.floor(elapsedMs / (1000 * 60 * 60 * 24)) + 1);
           if (dayOfSemester > SEMESTER_TOTAL_DAYS) {
             if (now < WINTER_BREAK) {
-              var daysToBreak = Math.ceil((WINTER_BREAK.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+              let daysToBreak = Math.ceil((WINTER_BREAK.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
               if (now >= EXAM_WEEK) {
                 // 考试周
                 if (countdownDaysEl) countdownDaysEl.textContent = String(daysToBreak);
@@ -710,10 +710,10 @@
                 if (countdownUnitEl) countdownUnitEl.textContent = '天';
                 if (countdownSubtitleEl) countdownSubtitleEl.textContent = '距寒假还有 ' + daysToBreak + ' 天，坚持就是胜利';
                 if (ringEl) {
-                  var examProgress = (now.getTime() - EXAM_WEEK.getTime()) / (WINTER_BREAK.getTime() - EXAM_WEEK.getTime());
-                  var examOffset = (1 - Math.min(1, Math.max(0, examProgress))) * RING_CIRCUMFERENCE;
+                  let examProgress = (now.getTime() - EXAM_WEEK.getTime()) / (WINTER_BREAK.getTime() - EXAM_WEEK.getTime());
+                  let examOffset = (1 - Math.min(1, Math.max(0, examProgress))) * RING_CIRCUMFERENCE;
                   ringEl.style.strokeDashoffset = Math.round(examOffset);
-                  var examHue = 40 - examProgress * 40;
+                  let examHue = 40 - examProgress * 40;
                   ringEl.style.stroke = 'hsl(' + Math.round(examHue) + ', 70%, 50%)';
                 }
               } else {
@@ -728,8 +728,8 @@
                 }
               }
             } else if (now < SPRING_START) {
-              var springMonth = SPRING_START.getMonth() + 1;
-              var springDay = SPRING_START.getDate();
+              let springMonth = SPRING_START.getMonth() + 1;
+              let springDay = SPRING_START.getDate();
               if (countdownDaysEl) countdownDaysEl.textContent = '--';
               if (countdownDaysTextEl) countdownDaysTextEl.textContent = '--';
               if (countdownLabelEl) countdownLabelEl.textContent = '寒假中';
@@ -755,7 +755,7 @@
             const pct = Math.round(progress * 100);
             if (countdownDaysEl) countdownDaysEl.textContent = pct + '%';
             if (countdownDaysTextEl) countdownDaysTextEl.textContent = pct + '%';
-            var phaseLabel = '学期进度';
+            let phaseLabel = '学期进度';
             if (now >= REVIEW_WEEK && now < EXAM_WEEK) {
               phaseLabel = '复习周·冲刺！';
             }
@@ -1001,7 +1001,7 @@
         weekNextEl.disabled = selectedWeek >= TOTAL_WEEKS;
         // 回到今天按钮：仅在非本周时显示
         if (weekTodayEl) {
-          weekTodayEl.classList.toggle('hidden', selectedWeek === CURRENT_WEEK || selectedWeek === 0);
+          weekTodayEl.classList.toggle('hidden', selectedWeek === getCurrentWeek() || selectedWeek === 0);
         }
         updateHeaderWeek();
       }
@@ -1046,7 +1046,7 @@
       weekPrevEl.addEventListener('click', function() { setWeek(selectedWeek - 1); });
       weekNextEl.addEventListener('click', function() { setWeek(selectedWeek + 1); });
       const weekTodayEl = document.getElementById('week-today');
-      if (weekTodayEl) weekTodayEl.addEventListener('click', function() { setWeek(CURRENT_WEEK); });
+      if (weekTodayEl) weekTodayEl.addEventListener('click', function() { setWeek(getCurrentWeek()); });
 
 
 
