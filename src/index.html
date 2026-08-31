@@ -349,61 +349,99 @@
     :root { --sk-bg: hsl(220, 15%, 91%); }
     [data-theme="dark"] { --sk-bg: hsl(220, 15%, 22%); }
 
-    /* Week View */
+    /* Week View - Grid */
     .week-view { display: none; }
     .week-view.active { display: block; }
     .day-view.hidden { display: none; }
-    .week-day-section {
-      background: var(--bg-card);
-      border-radius: 0.75rem;
-      padding: 0.75rem;
-      margin-bottom: 0.5rem;
-      border: 1px solid var(--border-light);
-      box-shadow: var(--shadow-card);
+    .week-grid-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
     }
-    .week-day-header {
-      font-size: 0.8rem;
+    .week-grid {
+      display: grid;
+      grid-template-columns: 3rem repeat(7, minmax(0, 1fr));
+      min-width: 0;
+      width: 100%;
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 0.75rem;
+      box-shadow: var(--shadow-card);
+      overflow: hidden;
+    }
+    .wg-corner {
+      border-bottom: 1px solid var(--border-light);
+      border-right: 1px solid var(--border-light);
+    }
+    .wg-dayhead {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
       font-weight: 600;
       color: var(--text-heading);
-      margin-bottom: 0.5rem;
-      padding-bottom: 0.5rem;
+      padding: 0.3rem 0.1rem;
       border-bottom: 1px solid var(--border-light);
+      border-right: 1px solid var(--border-light);
     }
-    .week-day-header .date {
-      font-size: 0.7rem;
+    .wg-dayhead span {
+      font-size: 0.62rem;
       font-weight: 400;
       color: var(--text-muted);
-      margin-left: 0.5rem;
+      margin-top: 0.1rem;
     }
-    .week-course-row {
+    .wg-dayhead.today {
+      color: var(--text-white);
+      background: var(--bg-tab-active);
+    }
+    .wg-dayhead.today span { color: rgba(255,255,255,0.85); }
+    .wg-time {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.66rem;
+      line-height: 1.15;
+      color: var(--text-muted);
+      border-right: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .wg-time .wg-time-t {
+      font-size: 0.4rem;
+      opacity: 0.8;
+      line-height: 1;
+      white-space: nowrap;
+    }
+    .wg-cell {
+      border-right: 1px solid var(--border-light);
+      border-bottom: 1px solid var(--border-light);
+    }
+    .wg-lunch {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.4rem 0.5rem;
-      border-radius: 0.5rem;
-      font-size: 0.75rem;
-      margin-bottom: 0.25rem;
-    }
-    .week-course-row .wc-time {
-      font-size: 0.65rem;
+      justify-content: center;
       color: var(--text-muted);
-      min-width: 4rem;
-      flex-shrink: 0;
+      font-size: 0.6rem;
+      line-height: 1;
+      background: var(--bg-tab-inactive);
+      border-top: 1px dashed var(--text-muted);
+      border-bottom: 1px dashed var(--border-light);
+      opacity: 0.85;
     }
-    .week-course-row .wc-name {
-      flex: 1;
+    .wg-course {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 1px;
+      border-radius: 0.3rem;
+      padding: 0.12rem 0.1rem;
+      font-size: 0.6rem;
       font-weight: 500;
-      color: var(--text-primary);
-    }
-    .week-course-row .wc-location {
-      font-size: 0.65rem;
-      color: var(--text-muted);
-      flex-shrink: 0;
-    }
-    .week-empty {
-      font-size: 0.7rem;
-      color: var(--text-muted);
-      padding: 0.3rem 0.5rem;
+      text-align: center;
+      word-break: break-word;
+      overflow: hidden;
+      box-sizing: border-box;
+      z-index: 2;
     }
     .view-toggle-btn {
       width: 2rem;
@@ -473,7 +511,6 @@
           </svg>
           <div class="absolute inset-0 flex flex-col items-center justify-center">
             <span id="countdown-days" class="sk-pulse text-lg font-bold leading-none" style="color:var(--ring-text);font-family:'Quicksand',sans-serif;">--</span>
-            <span class="text-[0.6rem] text-slate-400 leading-tight">天</span>
           </div>
         </div>
         <div>
@@ -1058,27 +1095,56 @@
       const dayViewEl = document.getElementById('day-view');
       const weekViewEl = document.getElementById('week-view');
 
+      function parsePeriod(periodStr) {
+        const m = /第(\d+)(?:-(\d+))?节/.exec(periodStr || '');
+        if (!m) return null;
+        const s = parseInt(m[1], 10);
+        const e = m[2] ? parseInt(m[2], 10) : s;
+        return { start: s, end: e };
+      }
+
       function renderWeekView() {
-        let html = '';
+        const LUNCH_AFTER = 5;
+        let maxPeriod = 12;
         for (let i = 0; i < 7; i++) {
-          const courses = getFilteredCourses(i);
-          const dateStr = getDayDate(i);
-          html += '<div class="week-day-section">';
-          html += '<div class="week-day-header">' + DAY_LABELS[i] + '<span class="date">' + dateStr + '</span></div>';
-          if (courses.length === 0) {
-            html += '<div class="week-empty">这天没有课</div>';
-          } else {
-            courses.forEach(function(c, idx) {
-              const color = getCourseColor(c.name, idx);
-              html += '<div class="week-course-row" style="background:' + color.bg + '; border:1px solid ' + color.border + ';">';
-              html += '<span class="wc-time">' + c.time + '</span>';
-              html += '<span class="wc-name">' + c.name + '</span>';
-              html += '<span class="wc-location">' + c.location + '</span>';
-              html += '</div>';
-            });
-          }
-          html += '</div>';
+          const day = SCHEDULE && SCHEDULE[i] ? SCHEDULE[i] : [];
+          day.forEach(function(c) {
+            const p = parsePeriod(c.period);
+            if (p && p.end > maxPeriod) maxPeriod = p.end;
+          });
         }
+        const rowOf = function(p) { return p <= LUNCH_AFTER ? p + 1 : p + 2; };
+        const PERIOD_TIMES = {1:{s:'08:00',e:'08:50'},2:{s:'08:50',e:'09:40'},3:{s:'10:00',e:'10:50'},4:{s:'10:50',e:'11:40'},5:{s:'11:40',e:'12:30'},6:{s:'14:00',e:'14:50'},7:{s:'15:00',e:'15:50'},8:{s:'15:50',e:'16:40'},9:{s:'17:00',e:'17:50'},10:{s:'17:50',e:'18:40'},11:{s:'19:10',e:'20:00'},12:{s:'20:00',e:'20:50'},13:{s:'20:50',e:'21:40'}};
+        let rows = '2.6rem';
+        for (let p = 1; p <= LUNCH_AFTER; p++) rows += ' 3.2rem';
+        rows += ' 0.9rem';
+        for (let p = LUNCH_AFTER + 1; p <= maxPeriod; p++) rows += ' 3.2rem';
+        let html = '<div class="week-grid-scroll"><div class="week-grid" style="grid-template-rows:' + rows + ';">';
+        html += '<div class="wg-corner"></div>';
+        for (let i = 0; i < 7; i++) {
+          html += '<div class="wg-dayhead' + (i === todayIndex ? ' today' : '') + '">' + DAY_LABELS[i] + '<span>' + getDayDate(i) + '</span></div>';
+        }
+        html += '<div class="wg-lunch" style="grid-row:' + (LUNCH_AFTER + 2) + '; grid-column:1/-1;">午休</div>';
+        for (let p = 1; p <= maxPeriod; p++) {
+          const r = rowOf(p);
+          html += '<div class="wg-time" style="grid-row:' + r + '; grid-column:1;"><span>' + p + '</span><span class="wg-time-t">' + (PERIOD_TIMES[p] ? PERIOD_TIMES[p].s + '-' + PERIOD_TIMES[p].e : '') + '</span></div>';
+          for (let d = 0; d < 7; d++) {
+            html += '<div class="wg-cell" style="grid-row:' + r + '; grid-column:' + (d + 2) + ';"></div>';
+          }
+        }
+        for (let d = 0; d < 7; d++) {
+          const courses = getFilteredCourses(d);
+          courses.forEach(function(c, idx) {
+            const p = parsePeriod(c.period);
+            if (!p) return;
+            const start = Math.max(1, p.start);
+            const end = Math.min(maxPeriod, p.end);
+            if (start > end) return;
+            const color = getCourseColor(c.name, idx);
+            html += '<div class="wg-course" style="grid-row:' + rowOf(start) + ' / ' + (rowOf(end) + 1) + '; grid-column:' + (d + 2) + '; background:' + color.bg + '; border:1px solid ' + color.border + '; color:' + color.text + ';">' + c.name + '</div>';
+          });
+        }
+        html += '</div></div>';
         weekViewEl.innerHTML = html;
       }
 
@@ -1106,6 +1172,9 @@
         viewToggleBtn.addEventListener('click', toggleView);
       }
 
+      window.renderWeekView = renderWeekView;
+      Object.defineProperty(window, 'isWeekView', { get: function() { return isWeekView; } });
+
 
     })();
   </script>
@@ -1113,7 +1182,7 @@
     // ─── Theme detection ───
     (function() {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); requestAnimationFrame(() => { if (typeof window.renderCourses === 'function') { window.renderCourses(); } if (typeof window.updateCountdown === 'function') { window.updateCountdown(); } }); }
+      function apply() { document.documentElement.setAttribute('data-theme', mq.matches ? 'dark' : 'light'); requestAnimationFrame(() => { if (typeof window.renderCourses === 'function') { window.renderCourses(); } if (typeof window.updateCountdown === 'function') { window.updateCountdown(); } if (window.isWeekView) { window.renderWeekView(); } }); }
       apply();
       mq.addEventListener('change', apply);
       // iOS PWA: matchMedia change event doesn't fire in standalone mode; re-check on visibility change (app back to foreground)
