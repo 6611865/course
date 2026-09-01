@@ -838,14 +838,6 @@
       }
 
       function getDayDate(dayIndex) {
-        if (selectedWeek === 0) {
-          const now = new Date();
-          let day = now.getDay();
-          const mondayOffset = day === 0 ? -6 : 1 - day;
-          let d = new Date(now);
-          d.setDate(now.getDate() + mondayOffset + dayIndex);
-          return (d.getMonth() + 1) + '.' + d.getDate();
-        }
         let d = new Date(SEMESTER_START);
         d.setDate(d.getDate() + (selectedWeek - 1) * 7 + dayIndex);
         return (d.getMonth() + 1) + '.' + d.getDate();
@@ -863,7 +855,7 @@
 
       function getFilteredCourses(dayIndex) {
         if (!SCHEDULE) return [];
-        const week = selectedWeek === 0 ? 1 : selectedWeek;
+        const week = selectedWeek;
         const all = SCHEDULE[dayIndex] || [];
         return all.filter(function(c) {
           if (!c.weekType) return true;
@@ -1015,18 +1007,6 @@
       });
 
       function updateWeekUI() {
-        if (selectedWeek === 0) {
-          weekBadgeEl.textContent = '未开学·预排课表';
-          weekBadgeEl.style.background = 'var(--badge-odd-bg)';
-          weekBadgeEl.style.color = 'var(--badge-odd-text)';
-          weekNumberEl.textContent = getWeekZeroLabel();
-          weekSubEl.textContent = '本周';
-          weekPrevEl.disabled = true;
-          weekNextEl.disabled = false;
-          if (weekTodayEl) weekTodayEl.classList.add('hidden');
-          updateHeaderWeek();
-          return;
-        }
         const parity = getParity(selectedWeek);
         const isOdd = parity === 'odd';
         weekBadgeEl.textContent = '第 ' + selectedWeek + ' 周 · ' + (isOdd ? '单周' : '双周');
@@ -1034,11 +1014,11 @@
         weekBadgeEl.style.color = isOdd ? 'var(--badge-odd-text)' : 'var(--badge-even-text)';
         weekNumberEl.textContent = String(selectedWeek);
         weekSubEl.textContent = '/ ' + TOTAL_WEEKS + ' 周';
-        weekPrevEl.disabled = selectedWeek <= 0;
+        weekPrevEl.disabled = selectedWeek <= 1;
         weekNextEl.disabled = selectedWeek >= TOTAL_WEEKS;
         // 回到今天按钮：仅在非本周时显示
         if (weekTodayEl) {
-          weekTodayEl.classList.toggle('hidden', selectedWeek === getCurrentWeek() || selectedWeek === 0);
+          weekTodayEl.classList.toggle('hidden', selectedWeek === getCurrentWeek());
         }
         updateHeaderWeek();
       }
@@ -1047,32 +1027,17 @@
         const now = new Date();
         const diffMs = now.getTime() - SEMESTER_START.getTime();
         const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-        if (diffDays < 0) return 0;
+        if (diffDays < 0) return 1;
         return Math.min(TOTAL_WEEKS, Math.floor(diffDays / 7) + 1);
-      }
-
-      function getWeekZeroLabel() {
-        const now = new Date();
-        let day = now.getDay();
-        const mondayOffset = day === 0 ? -6 : 1 - day;
-        const monday = new Date(now);
-        monday.setDate(now.getDate() + mondayOffset);
-        const sunday = new Date(monday);
-        sunday.setDate(monday.getDate() + 6);
-        return (monday.getMonth() + 1) + '/' + monday.getDate() + '-' + (sunday.getMonth() + 1) + '/' + sunday.getDate();
       }
 
       function updateHeaderWeek() {
         const week = getCurrentWeek();
-        if (week === 0) {
-          headerWeekEl.textContent = '未开学';
-        } else {
-          headerWeekEl.textContent = '第 ' + week + ' / ' + TOTAL_WEEKS + ' 周';
-        }
+        headerWeekEl.textContent = '第 ' + week + ' / ' + TOTAL_WEEKS + ' 周';
       }
 
       function setWeek(week) {
-        if (week < 0 || week > TOTAL_WEEKS || week === selectedWeek) return;
+        if (week < 1 || week > TOTAL_WEEKS || week === selectedWeek) return;
         selectedWeek = week;
         updateWeekUI();
         buildTabs();

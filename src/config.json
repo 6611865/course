@@ -16,7 +16,7 @@
     ],
     "1": [
       { "name": "计算机操作系统", "teacher": "游大涛", "cls": "006班", "location": "机房", "period": "第3-4节", "time": "10:00-11:40", "tag": "实验", "weekType": null },
-      { "name": "网络协议设计与分析", "teacher": "李熙", "cls": "002班", "location": "综合楼6202", "period": "第7-8节", "time": "15:00-16:40", "tag": null, "weekType": null },
+      { "name": "网络协议设计与分析", "teacher": "李熙", "cls": "002班", "location": "综合楼1201", "period": "第7-8节", "time": "15:00-16:40", "tag": null, "weekType": null },
       { "name": "网络协议设计与分析", "teacher": "李熙", "cls": "002班", "location": "机房", "period": "第9-10节", "time": "17:00-18:40", "tag": "实验", "weekType": null }
     ],
     "2": [],
