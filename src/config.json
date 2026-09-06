@@ -11,13 +11,13 @@
   },
   "schedule": {
     "0": [
-      { "name": "Python开发与应用", "teacher": "楚广琳", "cls": "008班", "location": "机房", "period": "第3-4节", "time": "10:00-11:40", "tag": "实验", "weekType": null },
+      { "name": "Python开发与应用", "teacher": "楚广琳", "cls": "008班", "location": "软件学院302+303", "period": "第3-4节", "time": "10:00-11:40", "tag": "实验", "weekType": null },
       { "name": "计算机操作系统", "teacher": "游大涛", "cls": "006班", "location": "综合楼5204", "period": "第11-13节", "time": "19:10-21:30", "tag": null, "weekType": null }
     ],
     "1": [
-      { "name": "计算机操作系统", "teacher": "游大涛", "cls": "006班", "location": "机房", "period": "第3-4节", "time": "10:00-11:40", "tag": "实验", "weekType": null },
+      { "name": "计算机操作系统", "teacher": "游大涛", "cls": "006班", "location": "软件学院502", "period": "第3-4节", "time": "10:00-11:40", "tag": "实验", "weekType": null },
       { "name": "网络协议设计与分析", "teacher": "李熙", "cls": "002班", "location": "综合楼1201", "period": "第7-8节", "time": "15:00-16:40", "tag": null, "weekType": null },
-      { "name": "网络协议设计与分析", "teacher": "李熙", "cls": "002班", "location": "机房", "period": "第9-10节", "time": "17:00-18:40", "tag": "实验", "weekType": null }
+      { "name": "网络协议设计与分析", "teacher": "李熙", "cls": "002班", "location": "曾宪梓楼505+506", "period": "第9-10节", "time": "17:00-18:40", "tag": "实验", "weekType": null }
     ],
     "2": [],
     "3": [
@@ -27,7 +27,7 @@
     ],
     "4": [
       { "name": "马克思主义基本原理概论", "teacher": "卢艳君", "cls": "021班", "location": "综合楼7205", "period": "第3-5节", "time": "10:00-12:30", "tag": null, "weekType": null },
-      { "name": "网络管理与测试", "teacher": "丁爽", "cls": "005班", "location": "机房", "period": "第7-8节", "time": "15:00-16:40", "tag": "实验单周", "weekType": "odd" },
+      { "name": "网络管理与测试", "teacher": "丁爽", "cls": "005班", "location": "曾宪梓楼505+506", "period": "第7-8节", "time": "15:00-16:40", "tag": "实验单周", "weekType": "odd" },
       { "name": "网络信息安全技术", "teacher": "罗来干", "cls": "005班", "location": "综合楼6202", "period": "第11-12节", "time": "19:10-20:40", "tag": null, "weekType": null }
     ],
     "5": [],
