@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'v20';
+const CACHE_VERSION = 'v21';
 const CACHE_NAME = 'course-table-' + CACHE_VERSION;
 const FONT_CACHE_NAME = 'course-table-fonts-' + CACHE_VERSION;
 const PRECACHE_URLS = [
